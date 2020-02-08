@@ -1,0 +1,24 @@
+{
+  "name": "scraping_puppeteer_whatsapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "example.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GalileoCap/scraping_puppeteer_whatsapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GalileoCap/scraping_puppeteer_whatsapp/issues"
+  },
+  "homepage": "https://github.com/GalileoCap/scraping_puppeteer_whatsapp#readme",
+  "dependencies": {
+    "puppeteer": "^2.1.0",
+    "sprintf": "^0.1.5"
+  }
+}

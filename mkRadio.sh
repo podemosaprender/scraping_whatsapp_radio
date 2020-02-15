@@ -21,5 +21,5 @@ done
 ffmpeg -y -f concat -safe 0 -i x_audio.txt -c copy x_audio.ogg
 #A: tengo un solo audio
 
-ffmpeg -y -loop 1 -i data_radio/img/portada.jpg -i x_audio.ogg -c:v libx264 -tune stillimage -c:a aac -b:a 64k -pix_fmt yuv420p -shortest x_radio.mp4
+#ffmpeg -y -loop 1 -i data_radio/img/portada.jpg -i x_audio.ogg -c:v libx264 -tune stillimage -c:a aac -b:a 64k -pix_fmt yuv420p -shortest x_radio.mp4 #A: video, por ahora no usamos
 

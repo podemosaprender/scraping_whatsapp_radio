@@ -2,12 +2,14 @@
 MARCA='El robot de PodemosAprender guardo hasta aca';
 stop= false;
 (async () => {
+	if (global.radioRunning) { return } radioRunning= true;
+
 	if (!global.Whatsapp_page) {
 		Whatsapp_page= await Browser.newPage();
 		await Whatsapp_page.goto('https://web.whatsapp.com/');
 	}
 
-	await Whatsapp_page.waitForXPath('//*[text()="PodemosAprender radio"]');
+	await Whatsapp_page.waitForXPath('//*[text()="PodemosAprender radio"]',{timeout:120000}); //A: esperamos hasta 2min
 
 	var isGroupSelected= false;
 	var xb= await Whatsapp_page.$x('//*[text()="PodemosAprender radio"]');

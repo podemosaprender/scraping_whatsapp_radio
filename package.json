@@ -19,6 +19,7 @@
   "homepage": "https://github.com/GalileoCap/scraping_puppeteer_whatsapp#readme",
   "dependencies": {
     "puppeteer": "^2.1.0",
+    "split": "^1.0.1",
     "sprintf": "^0.1.5"
   }
 }

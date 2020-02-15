@@ -1,21 +1,26 @@
 MARCA='El robot de PodemosAprender guardo hasta aca';
+
 var puppeteer= require('puppeteer');
 var fs= require('fs');
 var sprintf= require('sprintf');
 
-userData= 'datos_nav';
+SessionDataDir= 'datos_nav'; //U: donde se guardan cookies, etc. para que recuerde login, autorizacion, etc.
 
 (async () => {
   Browser = await puppeteer.launch({
-		headless: false,
-		args: [`--user-data-dir=${userData}`],
-		});
+		headless: false, //A: mostrar la ventana, asi podemos ir arreglando o probando cosas
+		args: [`--user-data-dir=${SessionDataDir}`], //A: para que la sesion sea persistente
+	});
   Whatsapp_page = await Browser.newPage();
   await Whatsapp_page.goto('https://web.whatsapp.com/');
 	console.log('ESPERANDO COMANDOS');
 })();
 
-var stdin = process.openStdin();
+//------------------------------------------------------------
+//S: LIBreria de funciones comodas que voy generalizando
+async function sleep(t) { //U: usar con await para esperar
+	new Promise(r => setTimeout(r, t));
+}
 
 function logValue(element) {
 	if (element._remoteObject) {
@@ -24,7 +29,7 @@ function logValue(element) {
 }
 
 function downloadUrl(page, fname, url) {
-	return page.evaluate((url) =>
+	return page.evaluate((url) => //A: esto se ejecuta como en la consola del navegador
 	{
 			var reval= fetch(url, { credentials: 'include' })
 				.then(r => r.blob())
@@ -49,8 +54,11 @@ function elementSrcFor(page, selector) {
 	}, selector);
 }
 
+//------------------------------------------------------------
+//S: control interactivo
+var stdin= process.openStdin(); //U: para leer comandos de la consola
 stdin.addListener("data", function(d) {
-	ctl= d.toString().trim();
+	ctl= d.toString().trim(); //A: eliminamos espacios antes o despues
 	console.log("you entered: [" + ctl + "]");
 
 	if (ctl == 'u') {
@@ -82,25 +90,33 @@ stdin.addListener("data", function(d) {
 	}
 	else if (ctl=='R') { (async () => {
 		await Whatsapp_page.$x('//*[text()[contains(.,"PodemosAprender radio")]]')
-		.then(x => x.map(e =>{ e.getProperty('innerText').then( v => logValue(v)); e.click(); }));
-		//A: elegi grupo radio
+		.then(x => x.map(e =>{ 
+			e.getProperty('innerText').then( v => logValue(v));  //DBG
+			e.click(); //A: elegi grupo radio
+		}));
 
 		var focused= false;
 		while (!focused) {
-			try { await Whatsapp_page.focus('[tabindex="0"]'); focused= true; }
-			catch (ex) { console.log("Wait focus"); await new Promise(r => setTimeout(r, 1000)); }
+			try { 
+				await Whatsapp_page.focus('[tabindex="0"]'); //A: lanza excepcion si no pudo!
+				focused= true; //A: si estoy aca es porque pudo, termina el while
+			}
+			catch (ex) { //A: lanzo ex, esperar y probar de nuevo
+				console.log("Wait focus"); await sleep(1000); 
+			}
 		}	
 
 		
 		while (true) {
-			var x= await Whatsapp_page.$x('//*[text()="'+MARCA+'"]');
-			if (x.length>0) { break; }
+			var x= await Whatsapp_page.$x('//*[text()="'+MARCA+'"]'); //A: busco la marca que puse la ultima vez que baje
+			if (x.length>0) { break; } //A: subi hasta que la encontre, listo otro paso
 			console.log("Buscando ...");
-			Whatsapp_page.keyboard.press('Home');
-			await new Promise(r => setTimeout(r, 5000)); //A: esperar 5s que cargue! 
+			Whatsapp_page.keyboard.press('Home'); //A: no la encontre, apreto "home" para subir un poco
+			await sleep(5000); //A: esperar 5s que cargue! 
 		}
 
 		var audios= await Whatsapp_page.$x('//*[text()="'+MARCA+'"]/following::audio')
+		//A: consigo los audios DESPUES de la marca, usando xpath <3 <3 <3
 		console.log("Audios len=" + audios.length);
 		var urls= audios.map(async (a,i) => {
 			var url= await a.getProperty("src");
@@ -119,8 +135,7 @@ stdin.addListener("data", function(d) {
 		await Whatsapp_page.keyboard.press('Enter');
 		await Whatsapp_page.keyboard.type('Para la fecha '+(new Date().toISOString()));
 		await Whatsapp_page.keyboard.press('Enter');
-
 	})(); }
-	else { eval(ctl); }
+	else { eval(ctl); } //A: si pegas un pedazo de javascript te lo evalua aca mismo
 	
 });

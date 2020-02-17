@@ -58,7 +58,7 @@ function fname_safe(s) {
 
 	var msgEs= await Whatsapp_page.$x("//*[text()='"+MARCA+"']/following::*[contains(concat(' ',normalize-space(@class),' '),' message-')]");		
 	var msgt= await Whatsapp_page.evaluate( (... msgEs) => {
-		return msgEs.map(e => e.innerHTML);
+		return msgEs.map(e => e.outerHTML);
 	}, ... msgEs);
 	console.log("MSG: "+msgt.length);
 	fs.writeFileSync('xmsg',JSON.stringify(msgt,null,1),'utf-8');

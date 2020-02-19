@@ -45,6 +45,9 @@ function fname_safe(s) {
 		}
 	}	
 	console.log("Focused");
+
+	var es= await Whatsapp_page.$x('//*[@tabindex="0"]');
+	await es[0].click(); //A: lanza excepcion si no pudo!
 	
 	while (true) { if (stop) { return }
 		var x= await Whatsapp_page.$x('//*[text()="'+MARCA+'"]'); //A: busco la marca que puse la ultima vez que baje
@@ -92,6 +95,9 @@ function fname_safe(s) {
 	await Whatsapp_page.keyboard.press('Enter');
 	await Whatsapp_page.keyboard.type('Para la fecha '+(new Date().toISOString()));
 	await Whatsapp_page.keyboard.press('Enter');
+	await Whatsapp_page.keyboard.type('Escuchalo en https://www.podemosaprender.org/data_radio/#/radio/'+TS);
+	await Whatsapp_page.keyboard.press('Enter');
+	await sleep(5000); //A: esperamos que suba
 	}
 
 	if (! global.dontExit) { await Browser.close(); process.exit(); }

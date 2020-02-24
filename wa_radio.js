@@ -1,6 +1,7 @@
 //INFO: bajar audios desde la ultima marca
+//GrpName= 'XPrueba';
 GrpName= global.GrpName || 'PodemosAprender radio';
-MARCA='El robot de PodemosAprender guardó hasta acá';
+var MARCA='El robot de PodemosAprender guardó hasta acá';
 stop= false;
 
 //if (global.radioRunning) { return } radioRunning= true;
@@ -26,10 +27,19 @@ for (var i=0; i<xb.length; xb++) {
 }
 if (!isGroupSelected) { L("ERROR: no encontre grupo"); return; }
 
-await scrollUp_x(miP,TAB0_x, x_t(MARCA)); 
+try { await scrollUp_x(miP,x_t(MARCA),null,20); }
+catch (ex) { 
+	var xs= 'You created this group';
+	L("Mark not found. First run?",xs);
+	await scrollUp_x(miP,x_t(xs),null,20); 
+	MARCA= xs;
+	L("Using mark", MARCA);
+}
 //A: subi a la marca que puse la ultima vez que baje
 
-var msgEs= await miP.$x(x_t(MARCA)+x_class('message-','*','/following::'));
+var msgX= x_t(MARCA)+x_class('message-','*','/following::');
+L("Buscando", msgX);
+var msgEs= await miP.$x(msgX);
 var msgt= await outerHTML(miP,msgEs);
 console.log("MSG: "+msgt.length);
 set_file_json('xmsg',msgt);
@@ -57,7 +67,7 @@ await Promise.all(msg.map(async (m,i) => {
 }));
 console.log("done");
 
-if (true) {
+if (false) {
 	await type(miP, MARCA+'\nPara la fecha '+ts()+'\nEscuchalo en https://www.podemosaprender.org/data_radio/#/radio/'+TS+'\n');
 	await sleep(5000); //A: esperamos que suba
 }

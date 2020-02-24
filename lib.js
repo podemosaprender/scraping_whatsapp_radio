@@ -3,6 +3,8 @@
 TAB0_s= '[tabindex="0"]';
 TAB0_x= '//*[@tabindex="0"]';
 
+function ser_json(o,wantsIndent) { return JSON.stringify(o,null,wantsIndent) }
+
 function L(x,y,z) { console.log(x,y||'',z||''); }
 function LV(element,msg) { if (element._remoteObject) { console.log(msg||'value',element._remoteObject.value); } }
 
@@ -71,12 +73,16 @@ async function click_x(p,xpath) {
 	await es[0].click(); //A: lanza excepcion si no pudo!
 }
 
-async function scrollUp_x(miP,marca_xpath,el_xpath) {
+async function scrollUp_x(miP,marca_xpath,el_xpath, maxTries) {
+	maxTries= maxTries || 100;
+
 	el_xpath= el_xpath || TAB0_x;
 	while (true) { if (stop) { throw('ScrollUp stopped'); }
 		var x= await miP.$x(marca_xpath); //A: busco la marca que puse la ultima vez que baje
 		//TODO: da timeout 30s await miP.waitForNavigation({waitUntil: 'networkidle0'});
-		L("ScrollUp "+marca_xpath+' '+x.length);
+		L("ScrollUp "+marca_xpath+' '+x.length+' '+maxTries);
+		if (maxTries-- < 0) { throw('ScrollUp '+marca_xpath+' not found'); }
+
 		await sleep(10000); //A: esperar 5s que cargue! 
 		if (x.length>0) { break; } //A: subi hasta que la encontre, listo otro paso
 		await focus_sel(miP,'[tabindex="0"]'); //A: lanza excepcion si no pudo!
@@ -86,7 +92,13 @@ async function scrollUp_x(miP,marca_xpath,el_xpath) {
 	//A: llegue a la ultima marca
 }
 
-function x_t(txt,tag,from) { return (from||'//')+(tag || '*')+'[text()="'+txt+'"]'; }
+function x_escape(txt) {
+	var p= txt.split(/'/);
+	if (p.length==1) { return "'"+txt+"'"; } //A: no habia comillas
+	return 'concat('+ p.map(t => ( "'"+t+"'")).join(', "\'", ')+')';
+}
+
+function x_t(txt,tag,from) { return (from||'//')+(tag || '*')+'[text()='+x_escape(txt)+']'; }
 function x_class(cls,tag,from) { return (from||'//')+(tag || '*')+'[contains(concat(" ",normalize-space(@class)," ")," '+cls+'")]'; }
 
 async function type(miP,txt) {

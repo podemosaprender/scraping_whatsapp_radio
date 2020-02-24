@@ -9,6 +9,8 @@ function L(x,y,z) { console.log(x,y||'',z||''); }
 function LV(element,msg) { if (element._remoteObject) { console.log(msg||'value',element._remoteObject.value); } }
 
 function ts() {return (new Date().toISOString()); }
+function td(d,ofs) { return new Date( (new Date(1900+d.getYear(),d.getMonth(),d.getDate())).getTime()+ofs*1000); }
+
 function fname_safe(s) { return (s||'_').replace(/[^A-Za-z0-9_-]+/g,'_'); }
 function set_file_json(fname,o) {
 	fs.writeFileSync(fname,JSON.stringify(o,null,1),'utf-8');
@@ -76,20 +78,32 @@ async function click_x(p,xpath) {
 async function scrollUp_x(miP,marca_xpath,el_xpath, maxTries) {
 	maxTries= maxTries || 100;
 
+	var marcas= Array.isArray(marca_xpath) ? marca_xpath : [marca_xpath];
+	var i=-1;
+	var x;
 	el_xpath= el_xpath || TAB0_x;
 	while (true) { if (stop) { throw('ScrollUp stopped'); }
-		var x= await miP.$x(marca_xpath); //A: busco la marca que puse la ultima vez que baje
-		//TODO: da timeout 30s await miP.waitForNavigation({waitUntil: 'networkidle0'});
-		L("ScrollUp "+marca_xpath+' '+x.length+' '+maxTries);
 		if (maxTries-- < 0) { throw('ScrollUp '+marca_xpath+' not found'); }
 
+		x= [];
+		for (i=0;  i<marcas.length; i++) {	
+			x= await miP.$x(marcas[i]); //A: busco la marca que puse la ultima vez que baje
+			if (x.length>0) break;
+		}
+
+		L("ScrollUp "+i+" "+marca_xpath+' '+x.length+' '+maxTries);
 		await sleep(10000); //A: esperar 5s que cargue! 
-		if (x.length>0) { break; } //A: subi hasta que la encontre, listo otro paso
+		if (x.length>0) { //A: subi hasta que la encontre, listo otro paso
+			L("ScrollUp found "+i+" "+marca_xpath+' '+x.length+' '+maxTries);
+			break; 
+		} 
 		await focus_sel(miP,'[tabindex="0"]'); //A: lanza excepcion si no pudo!
 		await click_x(miP,el_xpath); //A: lanza excepcion si no pudo!
 		await miP.keyboard.press('Home'); //A: no la encontre, apreto "home" para subir un poco
 	}
 	//A: llegue a la ultima marca
+	L("ScrollUp done "+i+" "+marca_xpath+' '+x.length+' '+maxTries);
+	return i<marcas.length ? [i,marcas[i],x] : null;
 }
 
 function x_escape(txt) {

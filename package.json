@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/GalileoCap/scraping_puppeteer_whatsapp#readme",
   "dependencies": {
+    "crypto": "^1.0.1",
     "puppeteer": "^2.1.0",
     "split": "^1.0.1",
     "sprintf": "^0.1.5"

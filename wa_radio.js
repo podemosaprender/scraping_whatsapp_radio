@@ -1,10 +1,14 @@
 //INFO: bajar audios desde la ultima marca
-GrpName= 'XPrueba';
+//GrpName= 'XPrueba';
 GrpName= global.GrpName || 'PodemosAprender radio';
 var MARCA='El robot de PodemosAprender guardó hasta acá';
-stop= false;
 
 var MARCA_NEW= 'You created this group';
+stop= false;
+
+var rTs= ts();
+var TPfx= 'tmp/'+fname_safe(GrpName);
+ensure_dir(TPfx);
 
 //if (global.radioRunning) { return } radioRunning= true;
 
@@ -39,7 +43,7 @@ L("Buscando", msgX);
 var msgEs= await miP.$x(msgX);
 var msgt= await outerHTML(miP,msgEs);
 console.log("MSG: "+msgt.length);
-set_file_json('xmsgh',msgt);
+set_file_json(TPfx+'/'+rTs+'.xmsgh.html',msgt);
 
 var whoPrev='unknown';
 var timePrev= null; //A: el primero que aparece ya tiene la fecha
@@ -69,17 +73,48 @@ var msg= msgt.map(t => {
 	timePrev= r.time;
 	return r;
 });
-set_file_json('xmsg',msg);
+set_file_json(TPfx+'/'+rTs+'.xmsg.json',msg);
 
 await Promise.all(msg.map(async (m,i) => {
 	if (m.a) {
 		var url= m.a;
-		var fname= 'audio'+sprintf('%02d',i)+'_'+fname_safe(m.who)+'.ogg';
-		console.log("Audio URL: "+i+' '+fname+' '+url);
-		return downloadUrl(miP,fname,url); 
+		var fname= ts(m.time)+'_'+fname_safe(m.who)+'.ogg';
+		var ffname= TPfx+'/'+fname;
+		m.audio= fname;
+		console.log("Audio URL: "+i+' '+ffname+' '+url);
+		return downloadUrl(miP,ffname,url); 
 	}
 }));
-console.log("done");
+console.log("Download done");
+
+msgS= []; //U: los mensajes que guardamos
+msg.forEach(m => {
+	var s= m.m.join('\n');
+	if (s.match(/deleted/)) { return false; }
+
+	var mS= {time: m.time, m: []};
+
+	if (m.audio) { mS.audio= m.audio; }
+
+	var ls= s.match(/(http\S+)/g);
+	if (ls) { 
+		ls.forEach(l => {
+			if (l.match(/youtube|youtu.be/)) { mS.video= l; }
+			else { mS.link= l; }
+		});
+	}
+
+	'who who2'.split(' ').forEach(k => {
+		mS[k]= (m[k] && m[k].match(/^\+\d+[ \d-]+$/)) ? hash_s(m[k]) : m[k]; //A: hash numeros de tel
+	});
+
+	m.m.forEach(x => {
+		mS.m.push( x.match(/^\+\d+[ \d-]+$/) ? hash_s(x) : x ); //A: hash numeros de tel
+	});
+
+	msgS.push(mS);
+});
+set_file_json(TPfx+'/'+rTs+'.msg.json',msgS);
 
 if (false) {
 	await type(miP, MARCA+'\nPara la fecha '+ts()+'\nEscuchalo en https://www.podemosaprender.org/data_radio/#/radio/'+TS+'\n');

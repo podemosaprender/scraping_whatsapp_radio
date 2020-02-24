@@ -1,5 +1,8 @@
 //------------------------------------------------------------
 //S: LIBreria de funciones comodas que voy generalizando
+
+crypto= require('crypto');
+
 TAB0_s= '[tabindex="0"]';
 TAB0_x= '//*[@tabindex="0"]';
 
@@ -8,13 +11,28 @@ function ser_json(o,wantsIndent) { return JSON.stringify(o,null,wantsIndent) }
 function L(x,y,z) { console.log(x,y||'',z||''); }
 function LV(element,msg) { if (element._remoteObject) { console.log(msg||'value',element._remoteObject.value); } }
 
-function ts() {return (new Date().toISOString()); }
+function ts(d) { var d= d || new Date(); return d.toISOString().replace(/[:-]/g,'').replace('T','_').substr(0,15); }
+
 function td(d,ofs) { return new Date( (new Date(1900+d.getYear(),d.getMonth(),d.getDate())).getTime()+ofs*1000); }
 
 function fname_safe(s) { return (s||'_').replace(/[^A-Za-z0-9_-]+/g,'_'); }
 function set_file_json(fname,o) {
 	fs.writeFileSync(fname,JSON.stringify(o,null,1),'utf-8');
 }
+function ensure_dir(rutaCarpetaSegura) { //U: crea el dir rutaCarpetaMision y todos los necesarios para llegar ahi
+  fs.mkdirSync(rutaCarpetaSegura, {recursive: true});
+}
+
+//U: hash para un string
+// Other algorithms: 'sha1', 'md5', 'sha256', 'sha512' ...depends on availability of OpenSSL on platform
+//VER: https://gist.github.com/GuillermoPena/9233069
+function hash_s(string, fmt = 'base64', algorithm = 'sha256') {
+	let shasum = crypto.createHash(algorithm);
+	shasum.update(string)
+	var hash = shasum.digest(fmt)
+	return hash;
+}
+
 
 async function exit() { await Browser.close(); process.exit(); }
 async function sleep(t) { return new Promise(r => setTimeout(r, t)); } //U: usar con await para esperar

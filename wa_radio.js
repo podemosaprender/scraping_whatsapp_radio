@@ -33,7 +33,7 @@ for (var i=0; i<xb.length; xb++) {
 }
 if (!isGroupSelected) { L("ERROR: no encontre grupo"); return; }
 
-var m= await scrollUp_x(miP,[x_t(MARCA),x_t(MARCA_NEW)],null,2); 
+var m= await scrollUp_x(miP,[x_t(MARCA),x_t(MARCA_NEW)],null,10); 
 if (m[0]==1) { MARCA= MARCA_NEW; } //A: grupo nuevo, no habia MARCA
 L("Mark",MARCA,m);
 //A: subi a la marca que puse la ultima vez que baje
@@ -82,7 +82,13 @@ await Promise.all(msg.map(async (m,i) => {
 		var ffname= TPfx+'/'+fname;
 		m.audio= fname;
 		console.log("Audio URL: "+i+' '+ffname+' '+url);
-		return downloadUrl(miP,ffname,url); 
+		if (fs.existsSync(ffname)) {
+			L(ffname,"exists, no need to download");
+			return (new Promise(r=> r()));
+		} 
+		else {
+		 	return downloadUrl(miP,ffname,url); 
+		}
 	}
 }));
 console.log("Download done");

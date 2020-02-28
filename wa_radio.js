@@ -6,6 +6,10 @@ var MARCA_NEW= 'You created this group';
 var marca= MARCA
 stop= false;
 
+if (global.RadioIsRunning) return; RadioIsRunning= true;
+
+try {
+
 var rTs= ts();
 var TPfx= 'tmp/'+fname_safe(GrpName);
 ensure_dir(TPfx);
@@ -122,9 +126,14 @@ msg.forEach(m => {
 });
 set_file_json(TPfx+'/'+rTs+'.msg.json',msgS);
 
-if (false) {
+if (global.sendMark) {
 	await type(miP, MARCA+'\nPara la fecha '+ts()+'\nEscuchalo en https://www.podemosaprender.org/radio/#/programa/'+fname_safe(GrpName)+'/'+rTs+'\n');
 	await sleep(5000); //A: esperamos que suba
 }
 
 L("WARadio "+GrpName+" done");
+
+}
+catch (ex) {
+	RadioIsRunning= false;
+}

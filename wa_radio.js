@@ -2,8 +2,8 @@
 //GrpName= 'XPrueba';
 GrpName= global.GrpName || 'PodemosAprender radio';
 var MARCA='El robot de PodemosAprender guardó hasta acá';
-
 var MARCA_NEW= 'You created this group';
+var marca= MARCA
 stop= false;
 
 var rTs= ts();
@@ -34,11 +34,11 @@ for (var i=0; i<xb.length; xb++) {
 if (!isGroupSelected) { L("ERROR: no encontre grupo"); return; }
 
 var m= await scrollUp_x(miP,[x_t(MARCA),x_t(MARCA_NEW)],null,10); 
-if (m[0]==1) { MARCA= MARCA_NEW; } //A: grupo nuevo, no habia MARCA
-L("Mark",MARCA,m);
+if (m[0]==1) { marca= MARCA_NEW; } //A: grupo nuevo, no habia MARCA
+L("Mark",marca,m);
 //A: subi a la marca que puse la ultima vez que baje
 
-var msgX= x_t(MARCA)+x_class('message-','*','/following::');
+var msgX= x_t(marca)+x_class('message-','*','/following::');
 L("Buscando", msgX);
 var msgEs= await miP.$x(msgX);
 var msgt= await outerHTML(miP,msgEs);
@@ -123,7 +123,7 @@ msg.forEach(m => {
 set_file_json(TPfx+'/'+rTs+'.msg.json',msgS);
 
 if (false) {
-	await type(miP, MARCA+'\nPara la fecha '+ts()+'\nEscuchalo en https://www.podemosaprender.org/data_radio/#/radio/'+TS+'\n');
+	await type(miP, MARCA+'\nPara la fecha '+ts()+'\nEscuchalo en https://www.podemosaprender.org/radio/#/programa/'+fname_safe(GrpName)+'/'+rTs+'\n');
 	await sleep(5000); //A: esperamos que suba
 }
 
